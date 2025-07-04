@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-%z#i)w)b5!kfye0e+ovd&biq0ld8-3)+$%_g(y4lsp*ji7^-@n
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["events.igamingafrika.com", '167.86.126.222', '167.86.126.222', "127.0.0.1", "summits.igamingafrika.com"]
+ALLOWED_HOSTS = ["events.igamingafrika.com", '167.86.126.222', "127.0.0.1", "summits.igamingafrika.com"]
 
 
 # Application definition
@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'base',
     'rest_framework',
     'rest_framework.authtoken',
+    'corsheaders',
 ]
 
 
@@ -58,12 +59,21 @@ REST_FRAMEWORK = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ALLOWED_ORIGINS = [
+    "https://summits.igamingafrika.com",
+    "http://summits.igamingafrika.com",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+# CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'iGamingForms.urls'
 
