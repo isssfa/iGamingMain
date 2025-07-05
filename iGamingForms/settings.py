@@ -76,6 +76,13 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8001",
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://summits.igamingafrika.com",
+    "http://summits.igamingafrika.com",
+    "https://events.igamingafrika.com",
+    "http://events.igamingafrika.com",
+    "http://127.0.0.1:8001",
+]
 
 CORS_ALLOW_CREDENTIALS = True
 # CORS_ALLOW_ALL_ORIGINS = True
