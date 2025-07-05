@@ -72,6 +72,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://summits.igamingafrika.com",
     "http://summits.igamingafrika.com",
     "https://events.igamingafrika.com",
+    "http://events.igamingafrika.com",
 ]
 
 
