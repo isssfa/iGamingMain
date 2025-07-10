@@ -27,7 +27,7 @@ JAZZMIN_SETTINGS = {
     "welcome_sign": "Welcome to the iGaming Afrika",
 
     # Copyright on the footer
-    "copyright": "Acme iGaming Afrika Ltd",
+    "copyright": "iGaming Afrika Ltd",
 
     # List of model admins to search from the search bar, search bar omitted if excluded
     # If you want to use a single search field you dont need to use a list, you can use a simple string
