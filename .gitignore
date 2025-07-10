@@ -197,6 +197,3 @@ cython_debug/
 *.sqlite3
 
 # Ignore all Django migrations folders
-**/migrations/
-**/migrations/*.py
-**/migrations/*.pyc
