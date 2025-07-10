@@ -5,11 +5,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import EventRegistrationSerializer, InquirySerializer
-from .models import EventRegistration
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from django.core.mail import send_mail
-
+from logs.utils import log_message
 
 class EventRegistrationView(APIView):
     authentication_classes = [TokenAuthentication]
@@ -45,13 +44,16 @@ class EventRegistrationView(APIView):
                 email.send()
                 email_sent = True
             except Exception as e:
-                print(f"Email send failed: {e}")
+                log_message("ERROR", f"Email send failed: {e}", user=request.user, source_app='base_EventRegistrationView_1')
+
 
             registration.email_sent = email_sent
             registration.save(update_fields=['email_sent'])
 
+            log_message("INFO", f"Registration successful.", user=request.user, source_app='base_EventRegistrationView_2')
             return Response({"message": "Registration successful."}, status=status.HTTP_201_CREATED)
 
+        log_message("CRITICAL", f"{serializer.errors}", user=request.user, source_app='base_EventRegistrationView_3')
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -75,9 +77,13 @@ class InquiryView(APIView):
                 )
                 email_sent = True
             except Exception as e:
-                print(f"Inquiry email failed: {e}")
+                log_message("ERROR", f"Inquiry email failed: {e}", user=request.user, source_app='base_InquiryView_1')
 
             inquiry.email_sent = email_sent
             inquiry.save(update_fields=['email_sent'])
+            log_message("INFO", f"Inquiry submitted successfully.", user=request.user, source_app='base_InquiryView_2')
             return Response({"message": "Inquiry submitted successfully."}, status=status.HTTP_201_CREATED)
+
+        log_message("CRITICAL", f"{serializer.errors}", user=request.user, source_app='base_InquiryView_3')
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+

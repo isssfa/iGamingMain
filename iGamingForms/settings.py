@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 from decouple import config
+import django
+from django.conf import settings
+from .theme_configurations import *
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,17 +24,40 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-%z#i)w)b5!kfye0e+ovd&biq0ld8-3)+$%_g(y4lsp*ji7^-@n'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["api.igamingafrika.com", "events.igamingafrika.com", '167.86.126.222', "127.0.0.1", "summits.igamingafrika.com"]
+
+try:
+    from coreconfig.utils import get_env_settings
+
+    ALLOWED_HOSTS = get_env_settings('ALLOWED_HOST') or ['127.0.0.1', 'localhost']
+    CORS_ALLOWED_ORIGINS = get_env_settings('CORS_ORIGIN') or []
+    CSRF_TRUSTED_ORIGINS = get_env_settings('CSRF_TRUSTED_ORIGIN') or []
+except:
+    ALLOWED_HOSTS = ["events.igamingafrika.com", '167.86.126.222', "127.0.0.1", "summits.igamingafrika.com"]
+    CORS_ALLOWED_ORIGINS = [
+        "https://summits.igamingafrika.com",
+        "http://summits.igamingafrika.com",
+        "https://events.igamingafrika.com",
+        "http://events.igamingafrika.com",
+    ]
+
+    CSRF_TRUSTED_ORIGINS = [
+        "https://summits.igamingafrika.com",
+        "http://summits.igamingafrika.com",
+        "https://events.igamingafrika.com",
+        "http://events.igamingafrika.com",
+    ]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,6 +66,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'base',
+    'sponsorship',
+    'sponsor',
+    'exhibition',
+    'speakers',
+    'logs',
+    'coreconfig',
+
+    'import_export',
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
@@ -65,22 +99,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'logs.middleware.ExceptionLoggingMiddleware'
 ]
 
 
-CORS_ALLOWED_ORIGINS = [
-    "https://summits.igamingafrika.com",
-    "http://summits.igamingafrika.com",
-    "https://events.igamingafrika.com",
-    "http://events.igamingafrika.com",
-]
-
-CSRF_TRUSTED_ORIGINS = [
-    "https://summits.igamingafrika.com",
-    "http://summits.igamingafrika.com",
-    "https://events.igamingafrika.com",
-    "http://events.igamingafrika.com",
-]
 
 CORS_ALLOW_CREDENTIALS = True
 # CORS_ALLOW_ALL_ORIGINS = True
@@ -152,7 +174,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 MEDIA_URL = '/media/'
 # Path where media is stored
 MEDIA_ROOT = BASE_DIR / "media"
@@ -171,3 +195,4 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
 NOTIFICATION_EMAIL = config('NOTIFICATION_EMAIL')
+

@@ -1,5 +1,9 @@
 from rest_framework import serializers
 from .models import EventRegistration, Inquiry
+import base64
+import imghdr
+import uuid
+from django.core.files.base import ContentFile
 
 class EventRegistrationSerializer(serializers.ModelSerializer):
     # Accept camelCase keys and map to model

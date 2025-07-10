@@ -193,5 +193,10 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
-# database
+# Ignore SQLite database
 *.sqlite3
+
+# Ignore all Django migrations folders
+**/migrations/
+**/migrations/*.py
+**/migrations/*.pyc
