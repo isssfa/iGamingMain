@@ -4,75 +4,70 @@ import os
 import time
 from django.utils.text import slugify
 
-class PackageBenefitItem(models.Model):
-    item = models.TextField()
-    added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
-
-    def __str__(self):
-        return self.item
-
-class PlatinumItem(models.Model):
-    item = models.TextField()
-    added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
-
-    def __str__(self):
-        return self.item
-
-class SilverItem(models.Model):
-    item = models.TextField()
-    added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
-
-    def __str__(self):
-        return self.item
-
-class GoldItem(models.Model):
-    item = models.TextField()
-    added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
-
-    def __str__(self):
-        return self.item
-
-class ImportantNoteItem(models.Model):
-    item = models.TextField()
-    added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
-
-    def __str__(self):
-        return self.item[:50]
-
 
 def sponsorship_icon_upload_path(instance, filename):
     ext = filename.split('.')[-1]
     timestamp = int(time.time())
-    sponsor_slug = slugify(instance.name)
+    sponsor_slug = slugify(instance.title)
     filename = f"{sponsor_slug}_{timestamp}.{ext}"
     return os.path.join('sponsorship', filename)
 
 
 class Sponsorship(models.Model):
-    STATUS_TYPES = [
-        ('on_hold', 'On Hold'),
-        ('available', 'Available'),
-        ('taken', 'Taken'),
-    ]
-    name = models.CharField(max_length=255)
-    package_benefit = models.BooleanField(default=False)
-    package_items = models.ManyToManyField(PackageBenefitItem, related_name='package_benefit_items', blank=True)
-    platinum_status = models.BooleanField("Platinum Sponsorship Status", default=False)
-    platinum_items = models.ManyToManyField(PlatinumItem, related_name='platinum_items', blank=True)
-    gold_status = models.BooleanField("Gold Sponsorship Status", default=False)
-    gold_items = models.ManyToManyField(GoldItem, related_name='gold_items', blank=True)
-    silver_status = models.BooleanField("Silver Sponsorship Status", default=False)
-    silver_items = models.ManyToManyField(SilverItem, related_name='silver_items', blank=True)
-    important_notes = models.BooleanField(default=False)
-    important_items = models.ManyToManyField(ImportantNoteItem, related_name='important_notes_items', blank=True)
-    included_tickets = models.TextField(blank=True, null=True)
-    icon = models.ImageField(upload_to=sponsorship_icon_upload_path, blank=True, null=True)
-    status = models.CharField(max_length=20, choices=STATUS_TYPES, null=True, blank=True)
-    price = models.IntegerField(null=True, blank=True)
+    """
+    Represents a sponsorship package for the iGaming AFRIKA Summit 2026.
+    """
+    # Core Sponsorship Details
+    title = models.CharField(blank=True, null=True, max_length=255, help_text="Title of the sponsorship package (e.g., 'Headline Sponsor')")
+    price = models.CharField(max_length=50, help_text="Price of the sponsorship package (e.g., '$55,000')")
+    status = models.CharField(
+        max_length=50,
+        choices=[
+            ('AVAILABLE', 'Available'),
+            ('SOLD', 'Sold'),
+            ('ON HOLD', 'On Hold'),
+            ('PENDING', 'Pending')
+        ],
+        default='AVAILABLE',
+        help_text="Current availability status of the sponsorship package"
+    )
+    icon = models.CharField(blank=True, null=True, max_length=50, help_text="Emoji or shortcode for an icon (e.g., '🎤')")
+    iconBg = models.CharField(max_length=50, blank=True, null=True, help_text="Background color class for the icon (e.g., 'bg-green-400')")
+    description = models.TextField(blank=True, null=True, help_text="General description or special notes (e.g., '*bespoke package pricing available on request*')")
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
+    # Benefits Sections (using TextField for flexibility, allowing markdown/bullet points)
+    benefits = models.TextField(blank=True, help_text="Comma-separated or newline-separated list of general benefits")
+    platinum_benefits = models.TextField(blank=True, help_text="Comma-separated or newline-separated list of Platinum benefits")
+    gold_benefits = models.TextField(blank=True, help_text="Comma-separated or newline-separated list of Gold benefits")
+    silver_benefits = models.TextField(blank=True, help_text="Comma-separated or newline-separated list of Silver benefits")
+    bronze_benefits = models.TextField(blank=True, help_text="Comma-separated or newline-separated list of Bronze benefits")
+
+    notes = models.TextField(blank=True, help_text="Additional notes or responsibilities (e.g., '*Venue branding is the responsibility of the sponsor*')")
+
+    tickets = models.TextField(blank=True, help_text="Details about included tickets (e.g., '40 Premium Passes...')")
+
+    icon_image = models.ImageField(upload_to=sponsorship_icon_upload_path, blank=True, null=True)
+
+
+    # Automatic Tracking Fields
+    created_at = models.DateTimeField(auto_now_add=True, help_text="Date and time when the sponsorship record was created.")
+    updated_at = models.DateTimeField(auto_now=True, help_text="Date and time when the sponsorship record was last updated.")
+    added_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='added_sponsorships',
+        help_text="The user who added this sponsorship record (auto-filled)."
+    )
+
+    class Meta:
+        verbose_name = "Sponsorship Package"
+        verbose_name_plural = "Sponsorship Packages"
+        ordering = ['price']
 
     def __str__(self):
-        return self.name
+        return self.title
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)

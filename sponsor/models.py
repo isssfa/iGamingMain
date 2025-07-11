@@ -16,13 +16,16 @@ def sponsor_logo_upload_path(instance, filename):
 class Sponsor(models.Model):
     SPONSOR_TYPES = [
         ('headline', 'Headline'),
+        ('platinum', 'Platinum'),
         ('gold', 'Gold'),
+        ('silver', 'Silver'),
         ('bronze', 'Bronze'),
         ('media', 'Media Partner'),
     ]
     name = models.CharField(max_length=255, unique=True, null=True, blank=True)
     logo = models.ImageField(upload_to=sponsor_logo_upload_path, null=True, blank=True)
     type = models.CharField(max_length=20, choices=SPONSOR_TYPES, null=True, blank=True)
+    url = models.URLField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
     added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)

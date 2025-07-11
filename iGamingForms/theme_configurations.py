@@ -46,9 +46,6 @@ JAZZMIN_SETTINGS = {
         # Url that gets reversed (Permissions can be added)
         {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
 
-        # external url that opens in a new window (Permissions can be added)
-        {"name": "Support", "url": "https://github.com/farridav/django-jazzmin/issues", "new_window": True},
-
         # model admin to link to (Permissions checked against model)
         {"model": "auth.User"},
 
@@ -101,6 +98,12 @@ JAZZMIN_SETTINGS = {
         "auth": "fas fa-users-cog",
         "auth.user": "fas fa-user",
         "auth.Group": "fas fa-users",
+        "auth_token.Token": "fas fa-users",
+        'base.EventRegistration': 'fas fa-registered',
+        'base.Inquiry': 'fas fa-question',
+        'coreconfig.EnvironmentSetting': 'fas fa-gears',
+        'logs.LogEntry': 'fas fa-history',
+        'speakers.Speaker': 'fas fa-volume-up',
     },
     # Icons that are used when one is not manually specified
     "default_icon_parents": "fas fa-chevron-circle-right",
@@ -117,7 +120,7 @@ JAZZMIN_SETTINGS = {
     #############
     # Relative paths to custom CSS/JS scripts (must be present in static files)
     "custom_css": None,
-    "custom_js": None,
+    "custom_js": "js/custom_jazzmin.js",
     # Whether to link font from fonts.googleapis.com (use custom_css to supply font otherwise)
     "use_google_fonts_cdn": True,
     # Whether to show the UI customizer on the sidebar

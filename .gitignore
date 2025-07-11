@@ -196,4 +196,9 @@ cython_debug/
 # Ignore SQLite database
 *.sqlite3
 
-# Ignore all Django migrations folders
+# Ignore all migration files except __init__.py
+**/migrations/*
+!**/migrations/__init__.py
+
+# Ignore all media
+media/*

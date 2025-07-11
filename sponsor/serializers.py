@@ -6,23 +6,14 @@ import uuid
 from django.core.files.base import ContentFile
 
 
-class SponsorSerializer(serializers.ModelSerializer):
-    logo_base64 = serializers.SerializerMethodField()
-    added_by = serializers.StringRelatedField(read_only=True)
+class SponsorDetailSerializer(serializers.ModelSerializer):
+    logo = serializers.SerializerMethodField()
 
     class Meta:
         model = Sponsor
-        fields = [
-            'id',
-            'name',
-            'logo_base64',
-            'type',
-            'created_at',
-            'updated_at',
-            'added_by',
-        ]
+        fields = ['name', 'logo', 'url']
 
-    def get_logo_base64(self, obj):
+    def get_logo(self, obj):
         if obj.logo:
             try:
                 with obj.logo.open('rb') as image_file:

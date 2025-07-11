@@ -1,14 +1,18 @@
-from django.core.mail import EmailMessage
-from django.template.loader import render_to_string
 from django.conf import settings
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .serializers import EventRegistrationSerializer, InquirySerializer
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.mail import EmailMessage
 from django.core.mail import send_mail
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from rest_framework import status
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from logs.utils import log_message
+from .serializers import EventRegistrationSerializer, InquirySerializer
+
 
 class EventRegistrationView(APIView):
     authentication_classes = [TokenAuthentication]
@@ -44,13 +48,14 @@ class EventRegistrationView(APIView):
                 email.send()
                 email_sent = True
             except Exception as e:
-                log_message("ERROR", f"Email send failed: {e}", user=request.user, source_app='base_EventRegistrationView_1')
-
+                log_message("ERROR", f"Email send failed: {e}", user=request.user,
+                            source_app='base_EventRegistrationView_1')
 
             registration.email_sent = email_sent
             registration.save(update_fields=['email_sent'])
 
-            log_message("INFO", f"Registration successful.", user=request.user, source_app='base_EventRegistrationView_2')
+            log_message("INFO", f"Registration successful.", user=request.user,
+                        source_app='base_EventRegistrationView_2')
             return Response({"message": "Registration successful."}, status=status.HTTP_201_CREATED)
 
         log_message("CRITICAL", f"{serializer.errors}", user=request.user, source_app='base_EventRegistrationView_3')
