@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG')
+DEBUG = False
 
 
 try:
@@ -37,12 +37,13 @@ try:
     CORS_ALLOWED_ORIGINS = get_env_settings('CORS_ORIGIN') or []
     CSRF_TRUSTED_ORIGINS = get_env_settings('CSRF_TRUSTED_ORIGIN') or []
 except:
-    ALLOWED_HOSTS = ["events.igamingafrika.com", '167.86.126.222', "127.0.0.1", "summits.igamingafrika.com"]
+    ALLOWED_HOSTS = ["events.igamingafrika.com", "summits.igamingafrika.com"]
     CORS_ALLOWED_ORIGINS = [
         "https://summits.igamingafrika.com",
         "http://summits.igamingafrika.com",
         "https://events.igamingafrika.com",
         "http://events.igamingafrika.com",
+        "http://localhost:5173",
     ]
 
     CSRF_TRUSTED_ORIGINS = [
