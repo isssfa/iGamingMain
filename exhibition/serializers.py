@@ -3,27 +3,6 @@ from .models import ExhibitionTier, ExhibitionOption, ExhibitionImage
 import base64
 import mimetypes
 
-class ExhibitionImageBase64Field(serializers.SerializerMethodField):
-    """
-    Custom SerializerMethodField to return the Base64 image with Data URI prefix.
-    """
-    def to_representation(self, obj):
-        if obj.image and obj.image.path:
-            try:
-                with open(obj.image.path, "rb") as image_file:
-                    encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-
-                mime_type, _ = mimetypes.guess_type(obj.image.path)
-                if mime_type is None:
-                    mime_type = 'application/octet-stream' # Default if type cannot be guessed
-
-                return f"data:{mime_type};base64,{encoded_string}"
-            except FileNotFoundError:
-                return None
-            except Exception as e:
-                print(f"Error processing image {obj.image.path}: {e}")
-                return None
-        return None
 
 
 class ExhibitionOptionSerializer(serializers.ModelSerializer):
@@ -77,14 +56,17 @@ class ExhibitionOptionSerializer(serializers.ModelSerializer):
 
     def get_images(self, obj):
         """
-        Returns a list of Base64 image strings for the related images.
+        Returns a list of full image URLs for the related images.
         """
-        image_list = []
-        for img_obj in obj.images.all():
-            base64_data = ExhibitionImageBase64Field().to_representation(img_obj)
-            if base64_data:
-                image_list.append(base64_data)
-        return image_list
+        request = self.context.get('request')
+        if not request:
+            return []
+
+        return [
+            request.build_absolute_uri(img_obj.image.url)
+            for img_obj in obj.images.all()
+            if img_obj.image
+        ]
 
 
 class ExhibitionTierSerializer(serializers.ModelSerializer):

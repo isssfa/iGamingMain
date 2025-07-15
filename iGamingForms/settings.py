@@ -27,31 +27,24 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = config('DEBUG')
 
 
-try:
-    from coreconfig.utils import get_env_settings
+ALLOWED_HOSTS = ["events.igamingafrika.com", "summits.igamingafrika.com", '127.0.0.1']
+CORS_ALLOWED_ORIGINS = [
+    "https://summits.igamingafrika.com",
+    "http://summits.igamingafrika.com",
+    "https://events.igamingafrika.com",
+    "http://events.igamingafrika.com",
+    "http://localhost:5173",
+]
 
-    ALLOWED_HOSTS = get_env_settings('ALLOWED_HOST') or ['127.0.0.1', 'localhost']
-    CORS_ALLOWED_ORIGINS = get_env_settings('CORS_ORIGIN') or []
-    CSRF_TRUSTED_ORIGINS = get_env_settings('CSRF_TRUSTED_ORIGIN') or []
-except:
-    ALLOWED_HOSTS = ["events.igamingafrika.com", "summits.igamingafrika.com"]
-    CORS_ALLOWED_ORIGINS = [
-        "https://summits.igamingafrika.com",
-        "http://summits.igamingafrika.com",
-        "https://events.igamingafrika.com",
-        "http://events.igamingafrika.com",
-        "http://localhost:5173",
-    ]
-
-    CSRF_TRUSTED_ORIGINS = [
-        "https://summits.igamingafrika.com",
-        "http://summits.igamingafrika.com",
-        "https://events.igamingafrika.com",
-        "http://events.igamingafrika.com",
-    ]
+CSRF_TRUSTED_ORIGINS = [
+    "https://summits.igamingafrika.com",
+    "http://summits.igamingafrika.com",
+    "https://events.igamingafrika.com",
+    "http://events.igamingafrika.com",
+]
 
 
 # Application definition

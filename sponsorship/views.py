@@ -57,7 +57,7 @@ class SponsorshipListAPIView(APIView):
                 )
 
         # Order the results, for example, by title or price
-        queryset = queryset.order_by('title')
+        queryset = queryset.order_by('id')
 
         # Serialize the filtered queryset
         # Pass request context for image URL generation

@@ -16,6 +16,7 @@ def sponsor_logo_upload_path(instance, filename):
 class Sponsor(models.Model):
     SPONSOR_TYPES = [
         ('headline', 'Headline'),
+        ('diamond', 'Diamond'),
         ('platinum', 'Platinum'),
         ('gold', 'Gold'),
         ('silver', 'Silver'),

@@ -38,6 +38,7 @@ class Sponsorship(models.Model):
     # Benefits Sections (using TextField for flexibility, allowing markdown/bullet points)
     benefits = models.TextField(blank=True, help_text="Comma-separated or newline-separated list of general benefits")
     platinum_benefits = models.TextField(blank=True, help_text="Comma-separated or newline-separated list of Platinum benefits")
+    diamond_benefits = models.TextField(blank=True, null=True, help_text="Comma-separated or newline-separated list of Diamond benefits")
     gold_benefits = models.TextField(blank=True, help_text="Comma-separated or newline-separated list of Gold benefits")
     silver_benefits = models.TextField(blank=True, help_text="Comma-separated or newline-separated list of Silver benefits")
     bronze_benefits = models.TextField(blank=True, help_text="Comma-separated or newline-separated list of Bronze benefits")
