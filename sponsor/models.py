@@ -21,6 +21,7 @@ class Sponsor(models.Model):
         ('gold', 'Gold'),
         ('silver', 'Silver'),
         ('bronze', 'Bronze'),
+        ('strategic', 'Strategic Partner'),
         ('media', 'Media Partner'),
     ]
     name = models.CharField(max_length=255, unique=True, null=True, blank=True)

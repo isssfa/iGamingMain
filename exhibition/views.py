@@ -29,5 +29,5 @@ class ExhibitionListAPIView(APIView):
         if tier_name:
             queryset = queryset.filter(name__iexact=tier_name) # Case-insensitive filter
 
-        serializer = ExhibitionTierSerializer(queryset, many=True)
+        serializer = ExhibitionTierSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
