@@ -38,11 +38,13 @@ class SponsorListAPIView(APIView):
         # Initialize the dictionary for the final structured response
         grouped_sponsors = {
             "headlineSponsor": None, # Will hold a single object
+            "diamondSponsors": [],
             "platinumSponsors": [],
             "goldSponsors": [],
             "silverSponsors": [],
             "bronzeSponsors": [],
             "mediaPartners": [],
+            "strategicPartners": [],
         }
 
         # Iterate through the filtered queryset and group sponsors
@@ -55,6 +57,8 @@ class SponsorListAPIView(APIView):
             if sponsor.type == 'headline':
                 if grouped_sponsors["headlineSponsor"] is None:
                     grouped_sponsors["headlineSponsor"] = sponsor_data
+            elif sponsor.type == 'diamond':
+                grouped_sponsors["diamondSponsors"].append(sponsor_data)
             elif sponsor.type == 'platinum':
                 grouped_sponsors["platinumSponsors"].append(sponsor_data)
             elif sponsor.type == 'gold':
@@ -63,6 +67,8 @@ class SponsorListAPIView(APIView):
                 grouped_sponsors["silverSponsors"].append(sponsor_data)
             elif sponsor.type == 'bronze':
                 grouped_sponsors["bronzeSponsors"].append(sponsor_data)
+            elif sponsor.type == 'strategic':
+                grouped_sponsors["strategicPartners"].append(sponsor_data)
             elif sponsor.type == 'media':
                 grouped_sponsors["mediaPartners"].append(sponsor_data)
 
