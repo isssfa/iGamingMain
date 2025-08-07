@@ -45,6 +45,7 @@ class SponsorListAPIView(APIView):
             "bronzeSponsors": [],
             "mediaPartners": [],
             "strategicPartners": [],
+            "attendingCompanies": [],
         }
 
         # Iterate through the filtered queryset and group sponsors
@@ -71,6 +72,8 @@ class SponsorListAPIView(APIView):
                 grouped_sponsors["strategicPartners"].append(sponsor_data)
             elif sponsor.type == 'media':
                 grouped_sponsors["mediaPartners"].append(sponsor_data)
+            elif sponsor.type == 'attending_companies':
+                grouped_sponsors["attendingCompanies"].append(sponsor_data)
 
         return Response(grouped_sponsors, status=status.HTTP_200_OK)
 

@@ -23,6 +23,7 @@ class Sponsor(models.Model):
         ('bronze', 'Bronze'),
         ('strategic', 'Strategic Partner'),
         ('media', 'Media Partner'),
+        ('attending_companies', 'Attending Companies'),
     ]
     name = models.CharField(max_length=255, unique=True, null=True, blank=True)
     logo = models.ImageField(upload_to=sponsor_logo_upload_path, null=True, blank=True)
