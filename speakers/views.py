@@ -30,5 +30,5 @@ class SpeakerViewSet(APIView):
         if role:
             queryset = queryset.filter(role__iexact=role)
 
-        serializer = SpeakerSerializer(queryset, many=True)
+        serializer = SpeakerSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
