@@ -37,6 +37,10 @@ CORS_ALLOWED_ORIGINS = [
     "https://events.igamingafrika.com",
     "http://events.igamingafrika.com",
     "http://localhost:5173",
+    "https://igasummit.com",
+    "http://igasummit.com",
+    "https://www.igasummit.com",
+    "http://www.igasummit.com"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
