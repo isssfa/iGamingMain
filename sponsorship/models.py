@@ -49,6 +49,9 @@ class Sponsorship(models.Model):
 
     icon_image = models.ImageField(upload_to=sponsorship_icon_upload_path, blank=True, null=True)
 
+    total_avalibility = models.IntegerField(default=0, help_text="Total number of sponsorship packages available.")
+
+    total_sold = models.IntegerField(default=0, help_text="Total number of sponsorship packages sold.")
 
     # Automatic Tracking Fields
     created_at = models.DateTimeField(auto_now_add=True, help_text="Date and time when the sponsorship record was created.")

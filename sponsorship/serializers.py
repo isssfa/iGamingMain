@@ -17,13 +17,19 @@ class SponsorshipSerializer(serializers.ModelSerializer):
 
     # Rename the icon_image field to 'images' as requested in the output
     images = serializers.SerializerMethodField()
+    
+    # New fields for total availability, total sold, and sponsor logos
+    total_availability = serializers.IntegerField(source='total_avalibility', read_only=True)
+    total_sold = serializers.IntegerField(read_only=True)
+    liked_sponsor_logos = serializers.SerializerMethodField()
 
     class Meta:
         model = Sponsorship
         fields = [
             'id', 'title', 'price', 'status', 'icon', 'iconBg', 'description',
             'benefits', 'platinumBenefits', 'diamondBenefits', 'goldBenefits', 'silverBenefits',
-            'bronzeBenefits', 'notes', 'tickets', 'images'
+            'bronzeBenefits', 'notes', 'tickets', 'images', 'total_availability', 'total_sold',
+            'liked_sponsor_logos'
         ]
 
     def _split_text_field(self, text):
@@ -61,6 +67,22 @@ class SponsorshipSerializer(serializers.ModelSerializer):
         if obj.icon_image and request:
             return request.build_absolute_uri(obj.icon_image.url)
         return None
+
+    def get_liked_sponsor_logos(self, obj):
+        """
+        Returns a list of logo URLs for sponsors associated with this sponsorship package.
+        """
+        request = self.context.get('request')
+        logos = []
+        # Get all sponsors associated with this sponsorship package
+        sponsors = obj.sponsors.all()
+        for sponsor in sponsors:
+            if sponsor.logo and request:
+                logos.append(request.build_absolute_uri(sponsor.logo.url))
+            elif sponsor.logo:
+                # Fallback if no request context
+                logos.append(sponsor.logo.url)
+        return logos
 
     # def get_images(self, obj):
     #     if obj.icon_image:

@@ -6,7 +6,7 @@ from import_export.admin import ImportExportModelAdmin
 @admin.register(Sponsorship)
 class SponsorshipAdmin(ImportExportModelAdmin):
     list_display = ['title','price', 'status', 'icon', 'created_at', 'added_by']
-    readonly_fields = ['created_at', 'updated_at', 'added_by']
+    readonly_fields = ['created_at', 'updated_at', 'added_by', 'total_sold']
 
     def save_model(self, request, obj, form, change):
         if not obj.pk:
