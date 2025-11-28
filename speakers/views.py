@@ -1,19 +1,17 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import AllowAny
 from .models import Speaker
 from .serializers import SpeakerSerializer
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
 
 class SpeakerViewSet(APIView):
     """
     API endpoint to retrieve exhibition tiers and their associated options and images.
     Supports filtering by tier name.
     """
-
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    # Public endpoint - no authentication required
+    permission_classes = [AllowAny]
 
     def get(self, request, *args, **kwargs):
         name = request.data.get('name', None)

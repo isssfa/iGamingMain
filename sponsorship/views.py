@@ -2,16 +2,15 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import AllowAny
 from django.db.models import Q # For complex lookups
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
 
 from .models import Sponsorship
 from .serializers import SponsorshipSerializer
 
 class SponsorshipListAPIView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    # Public endpoint - no authentication required
+    permission_classes = [AllowAny]
     """
     API endpoint to retrieve a list of sponsorship packages.
     Supports filtering by id, title (case-insensitive contains), price (exact), and status (exact).

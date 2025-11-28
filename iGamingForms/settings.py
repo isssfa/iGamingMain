@@ -40,7 +40,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://igasummit.com",
     "http://igasummit.com",
     "https://www.igasummit.com",
-    "http://www.igasummit.com"
+    "http://www.igasummit.com",
+    "http://127.0.0.1:8000",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -70,6 +71,7 @@ INSTALLED_APPS = [
     'speakers',
     'logs',
     'coreconfig',
+    'security',
 
     'import_export',
     'rest_framework',
@@ -84,8 +86,10 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
+    # Changed to AllowAny by default - individual views can override
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        # 'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend'
@@ -198,4 +202,20 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
 NOTIFICATION_EMAIL = config('NOTIFICATION_EMAIL')
+
+# Security Settings for API Protection
+# Enable origin validation for POST requests (recommended for production)
+ENABLE_ORIGIN_VALIDATION = config('ENABLE_ORIGIN_VALIDATION', default=True, cast=bool)
+
+# Optional: Separate secret for request signing (uses SECRET_KEY if not set)
+API_SIGNING_SECRET = config('API_SIGNING_SECRET', default=SECRET_KEY)
+
+# Cache backend for rate limiting (uses default cache if available)
+# Make sure CACHES is configured in your settings
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
 

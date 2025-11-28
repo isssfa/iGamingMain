@@ -1,20 +1,18 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import AllowAny
 from django.db.models import Prefetch
 from .models import ExhibitionTier, ExhibitionOption, ExhibitionImage
 from .serializers import ExhibitionTierSerializer
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
 
 class ExhibitionListAPIView(APIView):
     """
     API endpoint to retrieve exhibition tiers and their associated options and images.
     Supports filtering by tier name.
     """
-
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    # Public endpoint - no authentication required
+    permission_classes = [AllowAny]
 
     def get(self, request, *args, **kwargs):
         tier_name = request.data.get('tier', None)

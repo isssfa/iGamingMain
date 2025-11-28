@@ -2,16 +2,15 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import AllowAny
 from django.db.models import Q
 from .models import Sponsor
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
 
 from .serializers import SponsorDetailSerializer
 
 class SponsorListAPIView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    # Public endpoint - no authentication required
+    permission_classes = [AllowAny]
     """
     API endpoint to retrieve sponsors grouped by type, with filtering by name and type.
     """

@@ -1,9 +1,11 @@
 from django.contrib import admin
 from .models import Sponsor
+from .forms import SponsorAdminForm
 from import_export.admin import ImportExportModelAdmin
 
 @admin.register(Sponsor)
 class SponsorAdmin(ImportExportModelAdmin):
+    form = SponsorAdminForm
     list_display = ('name', 'type', 'added_by', 'created_at', "id")
     list_filter = ('type', 'created_at')
     search_fields = ('name', 'added_by__username')
@@ -17,3 +19,4 @@ class SponsorAdmin(ImportExportModelAdmin):
         if not obj.pk:
             obj.added_by = request.user
         super().save_model(request, obj, form, change)
+
