@@ -21,17 +21,25 @@ def validate_origin(request):
     Validate that the request comes from an allowed origin.
     Returns True if origin is valid or if origin checking is disabled.
     """
-    if not hasattr(settings, 'ENABLE_ORIGIN_VALIDATION') or not settings.ENABLE_ORIGIN_VALIDATION:
+    # Check if origin validation is disabled - if so, always return True
+    enable_validation = getattr(settings, 'ENABLE_ORIGIN_VALIDATION', False)
+    if not enable_validation:
         return True
     
+    # If validation is enabled, check the origin
     origin = request.META.get('HTTP_ORIGIN') or request.META.get('HTTP_REFERER')
     if not origin:
+        # If no origin/referer header, reject if validation is enabled
         return False
     
     # Extract domain from origin/referer
     from urllib.parse import urlparse
-    parsed = urlparse(origin)
-    origin_domain = f"{parsed.scheme}://{parsed.netloc}"
+    try:
+        parsed = urlparse(origin)
+        origin_domain = f"{parsed.scheme}://{parsed.netloc}"
+    except Exception:
+        # If parsing fails, reject if validation is enabled
+        return False
     
     # Check against allowed origins
     allowed_origins = getattr(settings, 'CORS_ALLOWED_ORIGINS', [])

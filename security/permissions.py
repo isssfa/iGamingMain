@@ -28,7 +28,21 @@ class ProtectedPostPermission(permissions.BasePermission):
         # For POST/PUT/PATCH/DELETE, require CSRF token
         if request.method in ['POST', 'PUT', 'PATCH', 'DELETE']:
             # Get CSRF token from header or data
-            csrf_token = request.META.get('HTTP_X_CSRF_TOKEN') or request.data.get('csrf_token')
+            # Django converts headers like "X-Csrf-Token" to "HTTP_X_CSRF_TOKEN" in META
+            csrf_token = request.META.get('HTTP_X_CSRF_TOKEN')
+            
+            # Also check request body if not in header (for form data or JSON)
+            if not csrf_token:
+                try:
+                    # Try to get from request data (works for JSON/form data)
+                    if hasattr(request, 'data') and request.data:
+                        csrf_token = request.data.get('csrf_token')
+                    # Also check query params as fallback
+                    if not csrf_token and hasattr(request, 'query_params'):
+                        csrf_token = request.query_params.get('csrf_token')
+                except (AttributeError, TypeError):
+                    # If request.data isn't available yet, that's okay
+                    pass
             
             if not csrf_token:
                 raise PermissionDenied(
@@ -44,11 +58,16 @@ class ProtectedPostPermission(permissions.BasePermission):
                     detail="Invalid or expired CSRF token. Please obtain a new token."
                 )
             
-            # Validate origin (optional but recommended)
-            if not validate_origin(request):
-                raise PermissionDenied(
-                    detail="Request origin is not allowed."
-                )
+            # Validate origin only if enabled (skip if disabled)
+            # This check happens AFTER CSRF validation to provide better error messages
+            origin_valid = validate_origin(request)
+            if not origin_valid:
+                # Only raise error if origin validation is actually enabled
+                from django.conf import settings
+                if getattr(settings, 'ENABLE_ORIGIN_VALIDATION', False):
+                    raise PermissionDenied(
+                        detail="Request origin is not allowed."
+                    )
             
             # Rate limiting check
             is_allowed, remaining, reset_time = rate_limit_check(
