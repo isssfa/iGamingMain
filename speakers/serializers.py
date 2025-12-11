@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Speaker
+from .models import Speaker, BecomeASpeaker
 import base64
 
 
@@ -63,3 +63,53 @@ class SpeakerSerializer(serializers.ModelSerializer):
     def get_events(self, obj):
         # Use the get_event_list method from your Speaker model
         return obj.get_event_list()
+
+
+class BecomeASpeakerSerializer(serializers.ModelSerializer):
+    """
+    Serializer for BecomeASpeaker model submissions.
+    Accepts camelCase keys and maps to model fields.
+    """
+    
+    class Meta:
+        model = BecomeASpeaker
+        fields = [
+            'first_name',
+            'last_name',
+            'email',
+            'phone_number',
+            'linkedin_profile',
+            'job_title',
+            'company_name',
+            'website_url',
+            'company_type',
+            'type_of_participation',
+            'talk_title',
+            'topic_description',
+            'supporting_files',
+        ]
+    
+    def to_internal_value(self, data):
+        # Map camelCase to snake_case for API compatibility
+        camel_to_snake = {
+            'firstName': 'first_name',
+            'lastName': 'last_name',
+            'phoneNumber': 'phone_number',
+            'linkedinProfile': 'linkedin_profile',
+            'jobTitle': 'job_title',
+            'companyName': 'company_name',
+            'websiteUrl': 'website_url',
+            'companyType': 'company_type',
+            'typeOfParticipation': 'type_of_participation',
+            'talkTitle': 'talk_title',
+            'topicDescription': 'topic_description',
+            'supportingFiles': 'supporting_files',
+        }
+        
+        # Convert camelCase keys to snake_case
+        converted_data = {}
+        for key, value in data.items():
+            snake_key = camel_to_snake.get(key, key)
+            converted_data[snake_key] = value
+        
+        return super().to_internal_value(converted_data)
