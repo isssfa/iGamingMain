@@ -75,7 +75,7 @@ class BecomeASpeakerView(APIView):
                     subject=f"🎤 New Speaker Submission - {submission.first_name} {submission.last_name}",
                     body=message,
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    to=[settings.NOTIFICATION_EMAIL]
+                    to=[settings.NOTIFICATION_EMAIL, "diana@igamingafrika.com "]
                 )
                 email.content_subtype = 'html'
                 
