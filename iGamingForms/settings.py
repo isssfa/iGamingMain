@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     'sponsor',
     'exhibition',
     'speakers',
+    'nomination',
     'logs',
     'coreconfig',
     'security',
