@@ -18,7 +18,9 @@ class NominationSerializer(serializers.ModelSerializer):
             'role',
             'nominated_company',
             'award_category',
-            'reason_for_nomination',
+            'background_information',
+            'specific_instance_project',
+            'impact_on_industry',
         ]
     
     def to_internal_value(self, data):
@@ -28,7 +30,9 @@ class NominationSerializer(serializers.ModelSerializer):
             'phoneNumber': 'phone_number',
             'nominatedCompany': 'nominated_company',
             'awardCategory': 'award_category',
-            'reasonForNomination': 'reason_for_nomination',
+            'backgroundInformation': 'background_information',
+            'specificInstanceProject': 'specific_instance_project',
+            'impactOnIndustry': 'impact_on_industry',
         }
         
         # Convert camelCase keys to snake_case

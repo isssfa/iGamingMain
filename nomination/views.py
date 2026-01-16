@@ -28,14 +28,16 @@ class NominationView(APIView):
             email_sent = False
             try:
                 context = {
-                    "full_name": nomination.full_name,
-                    "email": nomination.email,
+                    "full_name": nomination.full_name or "Not provided",
+                    "email": nomination.email or "Not provided",
                     "phone_number": nomination.phone_number or "Not provided",
                     "company": nomination.company or "Not provided",
                     "role": nomination.role or "Not provided",
                     "nominated_company": nomination.nominated_company or "Not provided",
                     "award_category": nomination.award_category or "Not provided",
-                    "reason_for_nomination": nomination.reason_for_nomination or "Not provided",
+                    "background_information": nomination.background_information or "Not provided",
+                    "specific_instance_project": nomination.specific_instance_project or "Not provided",
+                    "impact_on_industry": nomination.impact_on_industry or "Not provided",
                     "created_at": nomination.created_at,
                 }
                 message = render_to_string('nomination/email/nomination_notification.html', context)

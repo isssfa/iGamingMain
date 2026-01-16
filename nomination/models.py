@@ -7,14 +7,18 @@ class Nomination(models.Model):
     Model for award nominations.
     Captures information about the nominator and the nominated company.
     """
-    full_name = models.CharField(max_length=255)
-    email = models.EmailField()
-    phone_number = models.CharField(max_length=20)
-    company = models.CharField(max_length=255)
-    role = models.CharField(max_length=255)
-    nominated_company = models.CharField(max_length=255)
-    award_category = models.CharField(max_length=255)
-    reason_for_nomination = models.TextField()
+    full_name = models.CharField(max_length=255, null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
+    phone_number = models.CharField(max_length=20, null=True, blank=True)
+    company = models.CharField(max_length=255, null=True, blank=True)
+    role = models.CharField(max_length=255, null=True, blank=True)
+    nominated_company = models.CharField(max_length=255, null=True, blank=True)
+    award_category = models.CharField(max_length=255, null=True, blank=True)
+    
+    # Questions
+    background_information = models.TextField(null=True, blank=True)  # Question 1
+    specific_instance_project = models.TextField(null=True, blank=True)  # Question 2
+    impact_on_industry = models.TextField(null=True, blank=True)  # Question 3
     
     # Status and audit fields
     email_sent = models.BooleanField(default=False)
