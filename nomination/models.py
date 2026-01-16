@@ -10,6 +10,7 @@ class Nomination(models.Model):
     full_name = models.CharField(max_length=255, null=True, blank=True)
     email = models.EmailField(null=True, blank=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
+    linkedin_url = models.URLField(null=True, blank=True)
     company = models.CharField(max_length=255, null=True, blank=True)
     role = models.CharField(max_length=255, null=True, blank=True)
     nominated_company = models.CharField(max_length=255, null=True, blank=True)

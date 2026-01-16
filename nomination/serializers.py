@@ -14,6 +14,7 @@ class NominationSerializer(serializers.ModelSerializer):
             'full_name',
             'email',
             'phone_number',
+            'linkedin_url',
             'company',
             'role',
             'nominated_company',
@@ -28,6 +29,7 @@ class NominationSerializer(serializers.ModelSerializer):
         camel_to_snake = {
             'fullName': 'full_name',
             'phoneNumber': 'phone_number',
+            'linkedinUrl': 'linkedin_url',
             'nominatedCompany': 'nominated_company',
             'awardCategory': 'award_category',
             'backgroundInformation': 'background_information',

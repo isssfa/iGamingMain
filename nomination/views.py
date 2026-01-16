@@ -29,8 +29,9 @@ class NominationView(APIView):
             try:
                 context = {
                     "full_name": nomination.full_name or "Not provided",
-                    "email": nomination.email or "Not provided",
+                    "email": nomination.email or "noemail@example.com",
                     "phone_number": nomination.phone_number or "Not provided",
+                    "linkedin_url": nomination.linkedin_url or "https://www.linkedin.com/",
                     "company": nomination.company or "Not provided",
                     "role": nomination.role or "Not provided",
                     "nominated_company": nomination.nominated_company or "Not provided",
