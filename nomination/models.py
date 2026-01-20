@@ -14,7 +14,7 @@ class Nomination(models.Model):
     company = models.CharField(max_length=255, null=True, blank=True)
     role = models.CharField(max_length=255, null=True, blank=True)
     nominated_company = models.CharField(max_length=255, null=True, blank=True)
-    award_category = models.CharField(max_length=255, null=True, blank=True)
+    award_category = models.TextField(null=True, blank=True)
     
     # Questions
     background_information = models.TextField(null=True, blank=True)  # Question 1
