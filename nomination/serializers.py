@@ -7,7 +7,14 @@ class NominationSerializer(serializers.ModelSerializer):
     Serializer for Nomination model submissions.
     Accepts camelCase keys and maps to model fields.
     """
-    
+
+    # Ensure award_category is treated as a list of strings
+    award_category = serializers.ListField(
+        child=serializers.CharField(),
+        allow_null=True,
+        required=False
+    )
+
     class Meta:
         model = Nomination
         fields = [
@@ -44,4 +51,5 @@ class NominationSerializer(serializers.ModelSerializer):
             converted_data[snake_key] = value
         
         return super().to_internal_value(converted_data)
-
+        
+        
