@@ -32,24 +32,47 @@ class NominationSerializer(serializers.ModelSerializer):
         ]
     
     def to_internal_value(self, data):
-        # Map camelCase to snake_case for API compatibility
+        """
+        Map various frontend key styles (camelCase, other custom names)
+        to the actual model field names.
+        """
         camel_to_snake = {
+            # Basic identity fields
             'fullName': 'full_name',
+
+            # Phone / LinkedIn
             'phoneNumber': 'phone_number',
+            'phone': 'phone_number',
             'linkedinUrl': 'linkedin_url',
+            'linkedin': 'linkedin_url',
+
+            # Company fields
+            'companyName': 'company',
             'nominatedCompany': 'nominated_company',
+
+            # Award categories (list)
             'awardCategory': 'award_category',
+
+            # Question mappings from current payload
+            # reasonForNomination -> background_information (Q1)
+            'reasonForNomination': 'background_information',
+            # specialContribution -> specific_instance_project (Q2)
+            'specialContribution': 'specific_instance_project',
+            # impactOfNominee -> impact_on_industry (Q3)
+            'impactOfNominee': 'impact_on_industry',
+
+            # Old camelCase names (if still used anywhere)
             'backgroundInformation': 'background_information',
             'specificInstanceProject': 'specific_instance_project',
             'impactOnIndustry': 'impact_on_industry',
         }
-        
-        # Convert camelCase keys to snake_case
+
+        # Convert incoming keys to the expected field names
         converted_data = {}
         for key, value in data.items():
             snake_key = camel_to_snake.get(key, key)
             converted_data[snake_key] = value
-        
+
         return super().to_internal_value(converted_data)
         
         
