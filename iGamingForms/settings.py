@@ -244,6 +244,13 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
 NOTIFICATION_EMAIL = config('NOTIFICATION_EMAIL')
 
+# RabbitMQ Configuration
+RABBITMQ_HOST = config('RABBITMQ_HOST', default='localhost')
+RABBITMQ_PORT = config('RABBITMQ_PORT', default=5672, cast=int)
+RABBITMQ_USER = config('RABBITMQ_USER', default='guest')
+RABBITMQ_PASSWORD = config('RABBITMQ_PASSWORD', default='guest')
+RABBITMQ_VHOST = config('RABBITMQ_VHOST', default='/')
+
 # Security Settings for API Protection
 # Enable origin validation for POST requests (recommended for production)
 ENABLE_ORIGIN_VALIDATION = config('ENABLE_ORIGIN_VALIDATION', default=True, cast=bool)

@@ -30,3 +30,4 @@ class Nomination(models.Model):
     def __str__(self):
         return f"{self.full_name} - {self.nominated_company} ({self.award_category})"
 
+

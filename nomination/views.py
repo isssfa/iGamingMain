@@ -9,6 +9,7 @@ from .models import Nomination
 from .serializers import NominationSerializer
 from logs.utils import log_message
 from security.permissions import ProtectedPostPermission
+from coreconfig.service import email_service
 
 
 class NominationView(APIView):
@@ -24,8 +25,7 @@ class NominationView(APIView):
         if serializer.is_valid():
             nomination = serializer.save()
             
-            # Email logic
-            email_sent = False
+            # Queue email via RabbitMQ
             try:
                 context = {
                     "full_name": nomination.full_name or "Not provided",
@@ -41,20 +41,21 @@ class NominationView(APIView):
                     "impact_on_industry": nomination.impact_on_industry or "Not provided",
                     "created_at": nomination.created_at,
                 }
-                message = render_to_string('nomination/email/nomination_notification.html', context)
-                email = EmailMessage(
+                email_queue = email_service.send_email_task(
+                    email_type='nomination',
                     subject=f"🏆 New Award Nomination - {nomination.nominated_company}",
-                    body=message,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    to=[settings.NOTIFICATION_EMAIL]
+                    recipients=[settings.NOTIFICATION_EMAIL],
+                    context=context,
+                    template_path='nomination/email/nomination_notification.html',
+                    source_app='nomination_NominationView',
+                    related_model_id=nomination.id,
                 )
-                email.content_subtype = 'html'
-                email.send()
-                email_sent = True
+                email_sent = email_queue is not None
             except Exception as e:
                 user = getattr(request, 'user', None) if hasattr(request, 'user') and request.user.is_authenticated else None
-                log_message("ERROR", f"Nomination email send failed: {e}", user=user,
+                log_message("ERROR", f"Failed to queue nomination email: {e}", user=user,
                             source_app='nomination_NominationView_1')
+                email_sent = False
 
             nomination.email_sent = email_sent
             nomination.save(update_fields=['email_sent'])

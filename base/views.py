@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 
 from logs.utils import log_message
 from security.permissions import ProtectedPostPermission
+from coreconfig.service import email_service
 from .serializers import EventRegistrationSerializer, InquirySerializer
 
 
@@ -28,8 +29,7 @@ class EventRegistrationView(APIView):
                 registration.user = request.user
                 registration.save(update_fields=['user'])
 
-            # Email logic...
-            email_sent = False
+            # Queue email via RabbitMQ
             try:
                 context = {
                     "first_name": registration.first_name,
@@ -40,20 +40,21 @@ class EventRegistrationView(APIView):
                     "interests": registration.interests,
                     "created_at": registration.created_at,
                 }
-                message = render_to_string('email/registration_notification.html', context)
-                email = EmailMessage(
+                email_queue = email_service.send_email_task(
+                    email_type='registration',
                     subject=f"📬 New Event Registration Received - {registration.first_name}",
-                    body=message,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    to=[settings.NOTIFICATION_EMAIL]
+                    recipients=[settings.NOTIFICATION_EMAIL],
+                    context=context,
+                    template_path='email/registration_notification.html',
+                    source_app='base_EventRegistrationView',
+                    related_model_id=registration.id,
                 )
-                email.content_subtype = 'html'
-                email.send()
-                email_sent = True
+                email_sent = email_queue is not None
             except Exception as e:
                 user = getattr(request, 'user', None) if hasattr(request, 'user') and request.user.is_authenticated else None
-                log_message("ERROR", f"Email send failed: {e}", user=user,
+                log_message("ERROR", f"Failed to queue email: {e}", user=user,
                             source_app='base_EventRegistrationView_1')
+                email_sent = False
 
             registration.email_sent = email_sent
             registration.save(update_fields=['email_sent'])
@@ -79,19 +80,22 @@ class InquiryView(APIView):
         if serializer.is_valid():
             inquiry = serializer.save()
 
-            # Send email
+            # Queue email via RabbitMQ
             try:
-                send_mail(
+                plain_body = f"From: {inquiry.name} <{inquiry.email}>\n\n{inquiry.message}"
+                email_queue = email_service.send_email_task(
+                    email_type='inquiry',
                     subject=f"New Inquiry: {inquiry.topic}",
-                    message=f"From: {inquiry.name} <{inquiry.email}>\n\n{inquiry.message}",
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[settings.NOTIFICATION_EMAIL],
-                    fail_silently=False,
+                    recipients=[settings.NOTIFICATION_EMAIL],
+                    plain_body=plain_body,
+                    source_app='base_InquiryView',
+                    related_model_id=inquiry.id,
                 )
-                email_sent = True
+                email_sent = email_queue is not None
             except Exception as e:
                 user = getattr(request, 'user', None) if hasattr(request, 'user') and request.user.is_authenticated else None
-                log_message("ERROR", f"Inquiry email failed: {e}", user=user, source_app='base_InquiryView_1')
+                log_message("ERROR", f"Failed to queue inquiry email: {e}", user=user, source_app='base_InquiryView_1')
+                email_sent = False
 
             inquiry.email_sent = email_sent
             inquiry.save(update_fields=['email_sent'])

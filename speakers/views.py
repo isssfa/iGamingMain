@@ -9,6 +9,7 @@ from .models import Speaker, BecomeASpeaker
 from .serializers import SpeakerSerializer, BecomeASpeakerSerializer
 from logs.utils import log_message
 from security.permissions import ProtectedPostPermission
+from coreconfig.service import email_service
 
 class SpeakerViewSet(APIView):
     """
@@ -50,8 +51,7 @@ class BecomeASpeakerView(APIView):
         if serializer.is_valid():
             submission = serializer.save()
             
-            # Email logic
-            email_sent = False
+            # Queue email via RabbitMQ
             try:
                 context = {
                     "first_name": submission.first_name,
@@ -70,25 +70,28 @@ class BecomeASpeakerView(APIView):
                     "supporting_files_url": request.build_absolute_uri(submission.supporting_files.url) if submission.supporting_files else None,
                     "created_at": submission.created_at,
                 }
-                message = render_to_string('speakers/email/become_speaker_notification.html', context)
-                email = EmailMessage(
-                    subject=f"🎤 New Speaker Submission - {submission.first_name} {submission.last_name}",
-                    body=message,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    to=[settings.NOTIFICATION_EMAIL, "diana@igamingafrika.com "]
-                )
-                email.content_subtype = 'html'
                 
-                # Attach supporting file if present
+                # Prepare attachments
+                attachments = []
                 if submission.supporting_files:
-                    email.attach_file(submission.supporting_files.path)
+                    attachments.append(submission.supporting_files.path)
                 
-                email.send()
-                email_sent = True
+                email_queue = email_service.send_email_task(
+                    email_type='speaker',
+                    subject=f"🎤 New Speaker Submission - {submission.first_name} {submission.last_name}",
+                    recipients=[settings.NOTIFICATION_EMAIL, "diana@igamingafrika.com"],
+                    context=context,
+                    template_path='speakers/email/become_speaker_notification.html',
+                    attachments=attachments,
+                    source_app='speakers_BecomeASpeakerView',
+                    related_model_id=submission.id,
+                )
+                email_sent = email_queue is not None
             except Exception as e:
                 user = getattr(request, 'user', None) if hasattr(request, 'user') and request.user.is_authenticated else None
-                log_message("ERROR", f"Speaker submission email send failed: {e}", user=user,
+                log_message("ERROR", f"Failed to queue speaker submission email: {e}", user=user,
                             source_app='speakers_BecomeASpeakerView_1')
+                email_sent = False
 
             submission.email_sent = email_sent
             submission.save(update_fields=['email_sent'])
