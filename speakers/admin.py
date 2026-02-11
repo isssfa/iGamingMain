@@ -4,9 +4,9 @@ from import_export.admin import ImportExportModelAdmin
 
 @admin.register(Speaker)
 class SpeakerAdmin(ImportExportModelAdmin):
-    list_display = ('name', 'role', 'company', 'added_by', 'created_at')
+    list_display = ('name', 'role', 'company', 'is_featured', 'added_by', 'created_at')
     search_fields = ('name', 'role', 'company')
-    list_filter = ('created_at', 'added_by')
+    list_filter = ('is_featured', 'created_at', 'added_by')
     readonly_fields = ('created_at', 'updated_at', 'added_by')
 
     def event_list(self, obj):

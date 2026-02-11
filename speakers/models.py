@@ -33,6 +33,8 @@ class Speaker(models.Model):
         blank=True
     )
 
+    is_featured = models.BooleanField(default=False)
+
     # Audit Fields
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

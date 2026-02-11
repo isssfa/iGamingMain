@@ -41,6 +41,7 @@ class SpeakerSerializer(serializers.ModelSerializer):
             'image',
             'social',
             'events',
+            'is_featured',
         ]
 
     def get_image(self, obj):
