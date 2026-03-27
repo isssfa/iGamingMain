@@ -32,6 +32,7 @@ class EmailQueue(models.Model):
         ('nomination', 'Nomination'),
         ('speaker', 'Speaker Submission'),
         ('registration', 'Event Registration'),
+        ('awards_vote', 'Awards Vote Confirmation'),
         ('other', 'Other'),
     ]
     
