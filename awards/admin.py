@@ -1,5 +1,8 @@
+import csv
+
 from django.contrib import admin, messages
 from django.db.models import Case, Count, IntegerField, Sum, When
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import path
 from django.utils.html import format_html
@@ -8,6 +11,35 @@ from coreconfig.service import email_service
 
 from .models import Category, Nominee, Vote
 from .utils import build_confirmation_url, vote_rows_for_queue_context
+
+
+def _vote_summary_queryset():
+    return (
+        Vote.objects.values(
+            'category__id',
+            'category__title',
+            'nominee__id',
+            'nominee__nominee',
+        )
+        .annotate(
+            confirmed_votes=Sum(
+                Case(
+                    When(is_confirmed=True, then=1),
+                    default=0,
+                    output_field=IntegerField(),
+                )
+            ),
+            unconfirmed_votes=Sum(
+                Case(
+                    When(is_confirmed=False, then=1),
+                    default=0,
+                    output_field=IntegerField(),
+                )
+            ),
+            total_votes=Count('id'),
+        )
+        .order_by('category__title', 'nominee__nominee')
+    )
 
 
 @admin.register(Category)
@@ -45,6 +77,8 @@ class VoteAdmin(admin.ModelAdmin):
         'id',
         'voter_name',
         'voter_email',
+        'company',
+        'position',
         'category',
         'nominee',
         'is_confirmed',
@@ -54,13 +88,25 @@ class VoteAdmin(admin.ModelAdmin):
         'resend_button',
     ]
     list_filter = ['is_confirmed', 'email_sent', 'category', 'created_at']
-    search_fields = ['voter_name', 'voter_email', 'category__title', 'nominee__nominee']
+    search_fields = [
+        'voter_name',
+        'voter_email',
+        'company',
+        'position',
+        'category__title',
+        'nominee__nominee',
+    ]
     readonly_fields = ['created_at', 'confirmed_at', 'batch_id', 'confirmation_token']
     actions = ['resend_confirmation_email_action']
 
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
+            path(
+                'summary/export/',
+                self.admin_site.admin_view(self.summary_export_view),
+                name='awards_vote_summary_export',
+            ),
             path(
                 'summary/',
                 self.admin_site.admin_view(self.summary_view),
@@ -144,36 +190,42 @@ class VoteAdmin(admin.ModelAdmin):
     resend_confirmation_email_action.short_description = "Resend confirmation email(s)"
 
     def summary_view(self, request):
-        summary = (
-            Vote.objects.values(
-                'category__id',
-                'category__title',
-                'nominee__id',
-                'nominee__nominee',
-            )
-            .annotate(
-                confirmed_votes=Sum(
-                    Case(
-                        When(is_confirmed=True, then=1),
-                        default=0,
-                        output_field=IntegerField(),
-                    )
-                ),
-                unconfirmed_votes=Sum(
-                    Case(
-                        When(is_confirmed=False, then=1),
-                        default=0,
-                        output_field=IntegerField(),
-                    )
-                ),
-                total_votes=Count('id'),
-            )
-            .order_by('category__title', 'nominee__nominee')
-        )
+        summary = _vote_summary_queryset()
         context = dict(
             self.admin_site.each_context(request),
             title='Awards Vote Summary',
             summary=summary,
         )
         return render(request, 'admin/awards/vote_summary.html', context)
+
+    def summary_export_view(self, request):
+        summary = _vote_summary_queryset()
+        response = HttpResponse(content_type='text/csv; charset=utf-8')
+        response['Content-Disposition'] = 'attachment; filename="awards_vote_summary.csv"'
+        response.write('\ufeff')
+        writer = csv.writer(response)
+        writer.writerow(
+            [
+                'category_id',
+                'category_title',
+                'nominee_id',
+                'nominee_name',
+                'confirmed_votes',
+                'unconfirmed_votes',
+                'total_votes',
+            ]
+        )
+        for row in summary:
+            writer.writerow(
+                [
+                    row['category__id'],
+                    row['category__title'],
+                    row['nominee__id'],
+                    row['nominee__nominee'],
+                    row['confirmed_votes'] or 0,
+                    row['unconfirmed_votes'] or 0,
+                    row['total_votes'] or 0,
+                ]
+            )
+        return response
 

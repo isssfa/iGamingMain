@@ -50,6 +50,8 @@ class Nominee(models.Model):
 class Vote(models.Model):
     voter_name = models.CharField(max_length=255)
     voter_email = models.EmailField(db_index=True)
+    company = models.CharField(max_length=255, blank=True, default='')
+    position = models.CharField(max_length=255, blank=True, default='')
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='votes')
     nominee = models.ForeignKey(Nominee, on_delete=models.CASCADE, related_name='votes')
     batch_id = models.UUIDField(default=uuid.uuid4, db_index=True)

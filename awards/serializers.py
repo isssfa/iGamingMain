@@ -49,7 +49,22 @@ class VoteItemSerializer(serializers.Serializer):
 class VoteSubmissionSerializer(serializers.Serializer):
     voter_name = serializers.CharField(max_length=255)
     voter_email = serializers.EmailField()
+    company = serializers.CharField(max_length=255, required=False, allow_blank=True, default='')
+    position = serializers.CharField(max_length=255, required=False, allow_blank=True, default='')
     votes = VoteItemSerializer(many=True, allow_empty=False)
+
+    def to_internal_value(self, data):
+        camel_to_snake = {
+            'companyName': 'company',
+            'voterName': 'voter_name',
+            'voterEmail': 'voter_email',
+        }
+        if isinstance(data, dict):
+            converted = {}
+            for key, value in data.items():
+                converted[camel_to_snake.get(key, key)] = value
+            data = converted
+        return super().to_internal_value(data)
 
     def validate(self, attrs):
         votes = attrs.get("votes") or []

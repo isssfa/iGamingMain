@@ -41,6 +41,8 @@ class VoteSubmissionAPIView(APIView):
 
         voter_name = data['voter_name'].strip()
         voter_email = data['voter_email'].strip().lower()
+        company = (data.get('company') or '').strip()
+        position = (data.get('position') or '').strip()
         votes_payload = data['votes']
         category_ids = [item['category_obj'].id for item in votes_payload]
 
@@ -82,6 +84,8 @@ class VoteSubmissionAPIView(APIView):
                     Vote(
                         voter_name=voter_name,
                         voter_email=voter_email,
+                        company=company,
+                        position=position,
                         category=vote_item['category_obj'],
                         nominee=vote_item['nominee_obj'],
                         batch_id=batch_id,

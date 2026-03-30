@@ -1,7 +1,10 @@
 {% extends "admin/base_site.html" %}
 
 {% block content %}
-    <h1>Awards Vote Summary</h1>
+    <h1 style="display:inline-block;margin-right:16px;">Awards Vote Summary</h1>
+    <p style="margin:8px 0 16px;">
+        <a class="button" href="{% url 'admin:awards_vote_summary_export' %}">Download CSV</a>
+    </p>
     <table class="adminlist table" style="width: 100%; border-collapse: collapse;">
         <thead>
             <tr>

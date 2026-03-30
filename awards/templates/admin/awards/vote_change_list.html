@@ -4,6 +4,9 @@
     <li>
         <a href="{% url 'admin:awards_vote_summary' %}">View Vote Summary</a>
     </li>
+    <li>
+        <a href="{% url 'admin:awards_vote_summary_export' %}">Export Summary (CSV)</a>
+    </li>
     {{ block.super }}
 {% endblock %}
 
