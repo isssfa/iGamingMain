@@ -111,6 +111,14 @@ class RabbitMQEmailService:
                 'source_app': source_app,
                 'related_model_id': related_model_id,
             }
+
+            requeue_snapshot = {
+                'template_path': template_path,
+                'context': json.loads(json.dumps(context or {}, cls=DateTimeJSONEncoder)),
+                'html_body': html_body,
+                'plain_body': plain_body,
+                'attachments': list(attachments or []),
+            }
             
             # Create EmailQueue record
             email_queue = EmailQueue.objects.create(
@@ -120,6 +128,7 @@ class RabbitMQEmailService:
                 status='pending',
                 source_app=source_app or 'unknown',
                 related_model_id=related_model_id,
+                requeue_snapshot=requeue_snapshot,
             )
             
             # Add queue_id to email_data
@@ -246,6 +255,55 @@ class RabbitMQEmailService:
             
             return False
     
+    def _rebuild_email_data_from_awards_vote(self, email_queue, queue_id):
+        """Rebuild full RabbitMQ payload for awards vote confirmation when snapshot is missing (legacy rows)."""
+        try:
+            from awards.models import Vote
+            from awards.utils import build_confirmation_url, vote_rows_for_queue_context
+        except ImportError:
+            return None
+
+        try:
+            vote = Vote.objects.select_related('category', 'nominee').get(pk=email_queue.related_model_id)
+        except Vote.DoesNotExist:
+            return None
+
+        if vote.is_confirmed:
+            return None
+
+        pending = list(
+            Vote.objects.filter(
+                voter_email=vote.voter_email,
+                confirmation_token=vote.confirmation_token,
+                is_confirmed=False,
+            ).select_related('category', 'nominee')
+        )
+        if not pending:
+            return None
+
+        confirm_url = build_confirmation_url(
+            token=vote.confirmation_token,
+            email=vote.voter_email,
+            request=None,
+        )
+        vote_rows = vote_rows_for_queue_context(pending)
+        return {
+            'email_type': 'awards_vote',
+            'subject': email_queue.subject,
+            'recipients': email_queue.get_recipients_list(),
+            'from_email': settings.DEFAULT_FROM_EMAIL,
+            'queue_id': queue_id,
+            'source_app': email_queue.source_app,
+            'related_model_id': email_queue.related_model_id,
+            'template_path': 'awards/email/vote_confirmation.html',
+            'context': {
+                'voter_name': vote.voter_name,
+                'vote_rows': vote_rows,
+                'confirm_url': confirm_url,
+            },
+            'attachments': [],
+        }
+
     def requeue_failed_email(self, queue_id):
         """
         Requeue a failed email task
@@ -258,21 +316,58 @@ class RabbitMQEmailService:
         """
         try:
             email_queue = EmailQueue.objects.get(id=queue_id)
-            
-            # Prepare email data from stored information
-            # Note: We can't fully reconstruct template context, so we'll use basic info
-            # For full requeue, you may need to store more data in EmailQueue model
-            email_data = {
-                'email_type': email_queue.email_type,
-                'subject': email_queue.subject,
-                'recipients': email_queue.get_recipients_list(),
-                'from_email': settings.DEFAULT_FROM_EMAIL,
-                'queue_id': queue_id,
-                'source_app': email_queue.source_app,
-                'related_model_id': email_queue.related_model_id,
-                # Basic plain text body - in production, you might want to store more info
-                'plain_body': f"Email subject: {email_queue.subject}\n\nThis email was requeued after failure.",
-            }
+
+            snap = email_queue.requeue_snapshot or {}
+            if isinstance(snap, dict) and (snap.get('template_path') or snap.get('html_body') or snap.get('plain_body')):
+                email_data = {
+                    'email_type': email_queue.email_type,
+                    'subject': email_queue.subject,
+                    'recipients': email_queue.get_recipients_list(),
+                    'from_email': settings.DEFAULT_FROM_EMAIL,
+                    'queue_id': queue_id,
+                    'source_app': email_queue.source_app,
+                    'related_model_id': email_queue.related_model_id,
+                }
+                if snap.get('template_path'):
+                    email_data['template_path'] = snap['template_path']
+                    email_data['context'] = snap.get('context') or {}
+                if snap.get('html_body'):
+                    email_data['html_body'] = snap['html_body']
+                if snap.get('plain_body'):
+                    email_data['plain_body'] = snap['plain_body']
+                email_data['attachments'] = snap.get('attachments') or []
+            elif email_queue.email_type == 'awards_vote' and email_queue.related_model_id:
+                email_data = self._rebuild_email_data_from_awards_vote(email_queue, queue_id)
+                if not email_data:
+                    email_data = {
+                        'email_type': email_queue.email_type,
+                        'subject': email_queue.subject,
+                        'recipients': email_queue.get_recipients_list(),
+                        'from_email': settings.DEFAULT_FROM_EMAIL,
+                        'queue_id': queue_id,
+                        'source_app': email_queue.source_app,
+                        'related_model_id': email_queue.related_model_id,
+                        'plain_body': (
+                            f"Email subject: {email_queue.subject}\n\n"
+                            f"This email was requeued after failure but the original content "
+                            f"could not be restored. Use Resend from Awards votes admin instead."
+                        ),
+                    }
+            else:
+                email_data = {
+                    'email_type': email_queue.email_type,
+                    'subject': email_queue.subject,
+                    'recipients': email_queue.get_recipients_list(),
+                    'from_email': settings.DEFAULT_FROM_EMAIL,
+                    'queue_id': queue_id,
+                    'source_app': email_queue.source_app,
+                    'related_model_id': email_queue.related_model_id,
+                    'plain_body': (
+                        f"Email subject: {email_queue.subject}\n\n"
+                        f"This email was requeued after failure. Original template context was not stored; "
+                        f"requeue again after upgrading or resend from the source feature."
+                    ),
+                }
             
             self._ensure_connection()
             

@@ -17,7 +17,7 @@ class EmailQueueAdmin(admin.ModelAdmin):
                     'retry_count', 'created_at', 'processed_at', 'requeue_button']
     list_filter = ['status', 'email_type', 'created_at']
     search_fields = ['subject', 'recipients', 'source_app', 'error_message']
-    readonly_fields = ['created_at', 'updated_at', 'processed_at', 'retry_count']
+    readonly_fields = ['created_at', 'updated_at', 'processed_at', 'retry_count', 'requeue_snapshot']
     date_hierarchy = 'created_at'
     
     fieldsets = (
@@ -25,7 +25,7 @@ class EmailQueueAdmin(admin.ModelAdmin):
             'fields': ('email_type', 'subject', 'recipients', 'status')
         }),
         ('Tracking', {
-            'fields': ('source_app', 'related_model_id', 'retry_count')
+            'fields': ('source_app', 'related_model_id', 'retry_count', 'requeue_snapshot')
         }),
         ('Error Information', {
             'fields': ('error_message',),

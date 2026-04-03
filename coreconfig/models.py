@@ -42,6 +42,11 @@ class EmailQueue(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     source_app = models.CharField(max_length=100, help_text="Source application name")
     related_model_id = models.IntegerField(null=True, blank=True, help_text="ID of related model (e.g., Nomination.id)")
+    requeue_snapshot = models.JSONField(
+        null=True,
+        blank=True,
+        help_text="Serialized template/body/context so failed emails can be requeued with the same content.",
+    )
     retry_count = models.IntegerField(default=0, help_text="Number of retry attempts")
     error_message = models.TextField(null=True, blank=True, help_text="Error message if failed")
     created_at = models.DateTimeField(auto_now_add=True)
